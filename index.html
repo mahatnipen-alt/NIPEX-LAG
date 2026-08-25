@@ -49,6 +49,24 @@ body {
     max-width: 430px;
 }
 
+
+/* =========================================
+   SECURITY VISIBILITY
+========================================= */
+
+#mainContainer {
+    display: none;
+}
+
+#bypassContainer {
+    display: none;
+}
+
+
+/* =========================================
+   MAIN CARD
+========================================= */
+
 .card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -268,6 +286,51 @@ h1 {
 
 
 /* =========================================
+   BYPASS CARD
+========================================= */
+
+.error-card {
+    background: #1a0a0a;
+
+    border: 1px solid #441111;
+
+    border-radius: 28px;
+
+    padding: 40px 30px;
+
+    text-align: center;
+
+    box-shadow:
+        0 10px 40px
+        rgba(255,0,0,0.1);
+}
+
+.error-icon {
+    font-size: 50px;
+
+    margin-bottom: 20px;
+}
+
+.error-title {
+    color: var(--error);
+
+    font-size: 24px;
+
+    font-weight: bold;
+
+    margin-bottom: 15px;
+}
+
+.btn-red {
+    background: var(--error);
+
+    color: white;
+
+    margin-top: 20px;
+}
+
+
+/* =========================================
    FOOTER
 ========================================= */
 
@@ -295,103 +358,155 @@ h1 {
 
 <div class="container">
 
-    <div class="card">
+
+    <!-- =====================================
+         MAIN CONTAINER
+    ====================================== -->
+
+    <div id="mainContainer">
+
+        <div class="card">
 
 
-        <!-- LOGO -->
+            <!-- LOGO -->
 
-        <div class="logo">
+            <div class="logo">
 
-            <img
-                src="./assets/logo.png"
-                alt="NIPEX">
+                <img
+                    src="./assets/logo.png"
+                    alt="NIPEX">
+
+            </div>
+
+
+            <!-- TITLE -->
+
+            <h1>
+                NIPEX LAG
+            </h1>
+
+
+            <div class="subtitle">
+                Secure Daily License Generator
+            </div>
+
+
+            <!-- PUBLIC IP -->
+
+            <div class="ip-title">
+                YOUR PUBLIC IP
+            </div>
+
+
+            <div id="ipAddress">
+                CONNECTING...
+            </div>
+
+
+            <!-- LICENSE KEY -->
+
+            <div class="key-title">
+                YOUR LICENSE KEY
+            </div>
+
+
+            <div class="key-box">
+
+                <span id="finalKey">
+                    SECURE FETCHING...
+                </span>
+
+            </div>
+
+
+            <!-- COPY -->
+
+            <button
+                class="btn"
+                id="copyBtn"
+                onclick="copyKey()">
+
+                COPY LICENSE KEY
+
+            </button>
+
+
+            <!-- TELEGRAM -->
+
+            <button
+                class="btn telegram"
+                onclick="openTelegram()">
+
+                JOIN TELEGRAM
+
+            </button>
+
+
+            <!-- STATUS -->
+
+            <div
+                id="status"
+                class="status">
+
+                SYSTEM: CONNECTING
+
+            </div>
+
+
+            <!-- ERROR -->
+
+            <div id="error">
+
+                Unable to connect to IP service.
+                Please check your internet connection.
+
+            </div>
+
 
         </div>
 
-
-        <!-- TITLE -->
-
-        <h1>
-            NIPEX LAG
-        </h1>
+    </div>
 
 
-        <div class="subtitle">
-            Secure Daily License Generator
-        </div>
+    <!-- =====================================
+         BYPASS CONTAINER
+    ====================================== -->
+
+    <div id="bypassContainer">
+
+        <div class="error-card">
+
+            <div class="error-icon">
+                🚫
+            </div>
+
+            <div class="error-title">
+                Bypass Detected!
+            </div>
+
+            <p
+                style="
+                color:#888;
+                font-size:14px;
+                line-height:1.5;
+                ">
+
+                Direct access is prohibited.
+                Please use the official link
+                from the script to generate your key.
+
+            </p>
 
 
-        <!-- PUBLIC IP -->
+            <button
+                class="btn btn-red"
+                onclick="location.href='steps.html'">
 
-        <div class="ip-title">
-            YOUR PUBLIC IP
-        </div>
+                RETURN TO STEPS
 
-
-        <div id="ipAddress">
-            CONNECTING...
-        </div>
-
-
-        <!-- LICENSE KEY -->
-
-        <div class="key-title">
-            YOUR LICENSE KEY
-        </div>
-
-
-        <div class="key-box">
-
-            <span id="finalKey">
-                SECURE FETCHING...
-            </span>
-
-        </div>
-
-
-        <!-- COPY -->
-
-        <button
-            class="btn"
-            id="copyBtn"
-            onclick="copyKey()">
-
-            COPY LICENSE KEY
-
-        </button>
-
-
-        <!-- TELEGRAM -->
-
-        <button
-            class="btn telegram"
-            onclick="openTelegram()">
-
-            JOIN TELEGRAM
-
-        </button>
-
-
-        <!-- STATUS -->
-
-        <div
-            id="status"
-            class="status">
-
-            SYSTEM: CONNECTING
+            </button>
 
         </div>
-
-
-        <!-- ERROR -->
-
-        <div id="error">
-
-            Unable to connect to IP service.
-            Please check your internet connection.
-
-        </div>
-
 
     </div>
 
@@ -433,6 +548,109 @@ const TELEGRAM_LINK =
 
 const KEY_YEAR =
     2026;
+
+
+
+/* =========================================
+   SECURITY CHECK
+========================================= */
+
+function checkSecurity() {
+
+    const urlParams =
+        new URLSearchParams(
+            window.location.search
+        );
+
+
+    const source =
+        urlParams.get("source");
+
+
+    const referrer =
+        document.referrer;
+
+
+    /*
+     * Official sources
+     */
+
+    const allowed =
+        source === "official" ||
+        referrer.includes("vplink.io") ||
+        referrer.includes("lootdest.org") ||
+        referrer.includes("steps.html");
+
+
+    if (allowed) {
+
+
+        /*
+         * Agar source=official hai
+         * to URL se source hata do
+         */
+
+        if (
+            source === "official"
+        ) {
+
+            const cleanUrl =
+                window.location.protocol +
+                "//" +
+                window.location.host +
+                window.location.pathname;
+
+
+            window.history.replaceState(
+                {},
+                document.title,
+                cleanUrl
+            );
+
+        }
+
+
+        /*
+         * Main generator show
+         */
+
+        document
+            .getElementById(
+                "mainContainer"
+            )
+            .style.display = "block";
+
+
+        /*
+         * Generate key
+         */
+
+        generateLockedKey();
+
+    }
+    else {
+
+
+        /*
+         * Direct/bypass access
+         */
+
+        document
+            .getElementById(
+                "mainContainer"
+            )
+            .style.display = "none";
+
+
+        document
+            .getElementById(
+                "bypassContainer"
+            )
+            .style.display = "block";
+
+    }
+
+}
 
 
 
@@ -831,14 +1049,14 @@ async function copyKey() {
 function openTelegram() {
 
     window.location.href =
-        "https://t.me/nipex_lag";
+        TELEGRAM_LINK;
 
 }
 
 
 
 /* =========================================
-   START AUTOMATICALLY
+   START
 ========================================= */
 
 window.addEventListener(
@@ -846,12 +1064,13 @@ window.addEventListener(
     function() {
 
         /*
-         * Website open hote hi
-         * IP detect hoga aur
-         * key automatically generate hogi.
+         * Pehle security check
+         *
+         * Allowed hone par hi
+         * IP detect + key generate hoga.
          */
 
-        generateLockedKey();
+        checkSecurity();
 
     }
 );
@@ -860,4 +1079,4 @@ window.addEventListener(
 
 </body>
 
-</html>
+    </html>
