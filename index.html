@@ -24,10 +24,17 @@
     box-sizing: border-box;
 }
 
+html,
 body {
+    width: 100%;
+    min-height: 100%;
     margin: 0;
-    padding: 20px;
+    padding: 0;
+}
+
+body {
     min-height: 100vh;
+    padding: 20px;
 
     display: flex;
     justify-content: center;
@@ -42,17 +49,15 @@ body {
         "Segoe UI",
         Roboto,
         sans-serif;
+
+    overflow-x: hidden;
 }
 
 .container {
     width: 100%;
     max-width: 430px;
+    margin: 0 auto;
 }
-
-
-/* =========================================
-   SECURITY VISIBILITY
-========================================= */
 
 #mainContainer {
     display: none;
@@ -68,9 +73,14 @@ body {
 ========================================= */
 
 .card {
+    width: 100%;
+
     background: var(--card);
+
     border: 1px solid var(--border);
+
     border-radius: 28px;
+
     padding: 35px 25px;
 
     text-align: center;
@@ -92,6 +102,7 @@ body {
     margin: 0 auto 20px;
 
     border-radius: 50%;
+
     overflow: hidden;
 
     border: 2px solid var(--accent);
@@ -104,6 +115,9 @@ body {
 .logo img {
     width: 100%;
     height: 100%;
+
+    display: block;
+
     object-fit: cover;
 }
 
@@ -116,6 +130,7 @@ h1 {
     margin: 0;
 
     font-size: 28px;
+
     font-weight: 800;
 }
 
@@ -155,6 +170,8 @@ h1 {
     font-weight: bold;
 
     margin-bottom: 25px;
+
+    word-break: break-word;
 }
 
 
@@ -173,6 +190,8 @@ h1 {
 }
 
 .key-box {
+    width: 100%;
+
     background: #000000;
 
     border: 1px dashed var(--accent);
@@ -233,6 +252,7 @@ h1 {
 
 .btn:hover {
     transform: scale(1.02);
+
     background: var(--accent);
 }
 
@@ -247,6 +267,7 @@ h1 {
 
 .telegram {
     background: var(--telegram);
+
     color: #ffffff;
 }
 
@@ -290,6 +311,8 @@ h1 {
 ========================================= */
 
 .error-card {
+    width: 100%;
+
     background: #1a0a0a;
 
     border: 1px solid #441111;
@@ -346,6 +369,69 @@ h1 {
     font-weight: bold;
 
     text-align: center;
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 480px) {
+
+    body {
+        padding: 15px;
+    }
+
+    .container {
+        width: 100%;
+        max-width: 430px;
+    }
+
+    .card {
+        padding: 30px 20px;
+        border-radius: 24px;
+    }
+
+    .error-card {
+        padding: 35px 22px;
+        border-radius: 24px;
+    }
+
+    h1 {
+        font-size: 26px;
+    }
+
+    .logo {
+        width: 85px;
+        height: 85px;
+    }
+
+}
+
+
+/* =========================================
+   VERY SMALL SCREEN
+========================================= */
+
+@media (max-width: 320px) {
+
+    body {
+        padding: 10px;
+    }
+
+    .card {
+        padding: 25px 15px;
+    }
+
+    #finalKey {
+        font-size: 16px;
+    }
+
+    .btn {
+        font-size: 14px;
+        padding: 15px;
+    }
+
 }
 
 </style>
@@ -618,7 +704,8 @@ function checkSecurity() {
             .getElementById(
                 "mainContainer"
             )
-            .style.display = "block";
+            .style.display =
+            "block";
 
 
         /*
@@ -626,6 +713,13 @@ function checkSecurity() {
          */
 
         generateLockedKey();
+
+
+        /*
+         * 6 AM refresh schedule
+         */
+
+        scheduleDailyRefresh();
 
     }
     else {
@@ -639,14 +733,16 @@ function checkSecurity() {
             .getElementById(
                 "mainContainer"
             )
-            .style.display = "none";
+            .style.display =
+            "none";
 
 
         document
             .getElementById(
                 "bypassContainer"
             )
-            .style.display = "block";
+            .style.display =
+            "block";
 
     }
 
@@ -698,6 +794,225 @@ async function getPublicIP() {
 
 
 /* =========================================
+   INDIA TIME
+========================================= */
+
+function getIndiaTime() {
+
+    const parts =
+        new Intl.DateTimeFormat(
+            "en-US",
+            {
+                timeZone:
+                    "Asia/Kolkata",
+
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+
+                hour12: false
+            }
+        ).formatToParts(
+            new Date()
+        );
+
+
+    const values = {};
+
+
+    parts.forEach(
+        function(part) {
+
+            if (
+                part.type !== "literal"
+            ) {
+
+                values[
+                    part.type
+                ] =
+                    Number(
+                        part.value
+                    );
+
+            }
+
+        }
+    );
+
+
+    return {
+        year: values.year,
+        month: values.month,
+        day: values.day,
+        hour: values.hour,
+        minute: values.minute,
+        second: values.second
+    };
+
+}
+
+
+
+/* =========================================
+   DAILY CYCLE
+   RESET = 06:00 AM IST
+========================================= */
+
+function getDailyCycle() {
+
+    const india =
+        getIndiaTime();
+
+
+    /*
+     * 6 AM se pehle
+     * previous day's cycle
+     */
+
+    let year =
+        india.year;
+
+    let month =
+        india.month;
+
+    let day =
+        india.day;
+
+
+    if (
+        india.hour < 6
+    ) {
+
+        const previous =
+            new Date(
+                Date.UTC(
+                    year,
+                    month - 1,
+                    day
+                )
+            );
+
+
+        previous.setUTCDate(
+            previous.getUTCDate() - 1
+        );
+
+
+        year =
+            previous.getUTCFullYear();
+
+        month =
+            previous.getUTCMonth() + 1;
+
+        day =
+            previous.getUTCDate();
+
+    }
+
+
+    /*
+     * Stable daily number
+     */
+
+    return Math.floor(
+        Date.UTC(
+            year,
+            month - 1,
+            day
+        ) / 86400000
+    );
+
+}
+
+
+
+/* =========================================
+   NEXT 6:00 AM IST
+========================================= */
+
+function getMillisecondsUntilNextReset() {
+
+    const now =
+        new Date();
+
+
+    const india =
+        getIndiaTime();
+
+
+    /*
+     * Current India date ko
+     * UTC timestamp mein convert karo
+     */
+
+    let targetDate =
+        Date.UTC(
+            india.year,
+            india.month - 1,
+            india.day,
+            0,
+            30,
+            0
+        );
+
+
+    /*
+     * India 6 AM =
+     * UTC 00:30
+     */
+
+
+    /*
+     * Agar current India time
+     * 6 AM ya uske baad hai,
+     * next day 6 AM target karo.
+     */
+
+    if (
+        india.hour >= 6
+    ) {
+
+        targetDate +=
+            86400000;
+
+    }
+
+
+    /*
+     * Current UTC time se
+     * target tak difference
+     */
+
+    let delay =
+        targetDate -
+        now.getTime();
+
+
+    /*
+     * Safety fallback
+     */
+
+    if (
+        delay < 1000
+    ) {
+
+        delay =
+            1000;
+
+    }
+
+
+    return delay;
+
+}
+
+
+
+/* =========================================
    GENERATE KEY
 ========================================= */
 
@@ -705,13 +1020,11 @@ function generateKeyFromIP(ip) {
 
 
     /*
-     * Current day
+     * Daily cycle
      */
 
     const day =
-        Math.floor(
-            Date.now() / 86400000
-        );
+        getDailyCycle();
 
 
     /*
@@ -790,7 +1103,9 @@ function generateKeyFromIP(ip) {
     ) {
 
 
-        if (i > 0) {
+        if (
+            i > 0
+        ) {
 
             finalKey += "-";
 
@@ -963,6 +1278,42 @@ async function generateLockedKey() {
 
 
 /* =========================================
+   AUTOMATIC 6 AM REFRESH
+========================================= */
+
+function scheduleDailyRefresh() {
+
+    const delay =
+        getMillisecondsUntilNextReset();
+
+
+    setTimeout(
+        async function() {
+
+
+            /*
+             * 6 AM par naya key
+             */
+
+            await generateLockedKey();
+
+
+            /*
+             * Next day's 6 AM
+             */
+
+            scheduleDailyRefresh();
+
+
+        },
+        delay
+    );
+
+}
+
+
+
+/* =========================================
    COPY
 ========================================= */
 
@@ -1065,9 +1416,6 @@ window.addEventListener(
 
         /*
          * Pehle security check
-         *
-         * Allowed hone par hi
-         * IP detect + key generate hoga.
          */
 
         checkSecurity();
@@ -1079,4 +1427,4 @@ window.addEventListener(
 
 </body>
 
-    </html>
+</html>
